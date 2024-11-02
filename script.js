@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // Inicializar Fabric.js
 const canvas = new fabric.Canvas("cnvs");
 canvas.backgroundColor = 'yellow';
@@ -75,6 +77,9 @@ loader.load(
     console.error('Error al cargar el archivo .obj', error);
   }
 );
+
+
+
 
 // Crear textura de canvas de Fabric para Three.js
 const canvasTexture = new THREE.CanvasTexture(canvas.getElement());
@@ -313,3 +318,4 @@ var getIntersects = function (_0x22e88c, _0x46e71c) {
   raycaster.setFromCamera(mouse, camera);
   return raycaster.intersectObjects(_0x46e71c);
 };
+
