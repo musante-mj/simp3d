@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+
 // Inicializar Fabric.js
 const canvas = new fabric.Canvas("cnvs");
 canvas.backgroundColor = 'yellow';
@@ -56,7 +57,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 container.appendChild(renderer.domElement);
 
 // Añadir iluminación en la escena de Three.js
-const light = new THREE.DirectionalLight(0xffffff, 0.5);
+const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.setScalar(10);
 scene.add(light);
 scene.add(new THREE.AmbientLight(0xffffff, 1));
@@ -96,12 +97,29 @@ loader.load(
 
 
 
-// Loop de renderizado
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-animate();
+function animateRandom(){
+	var randomX = THREE.Math.randInt(50, 206);
+	var randomY = THREE.Math.randInt(50, 206);
+  }
+  
+  animateRandom();
+  setInterval(animateRandom, 1000);
+  
+  var clock = new THREE.Clock();
+  var time = 0;
+  
+  function render() {
+	requestAnimationFrame(render);
+	time += clock.getDelta();
+	renderer.render(scene, camera);
+  }
+  
+  render();
+
+
+
+
+
 
 fabric.Canvas.prototype.getPointer = function (_0x2fd889, _0x112d2f) { 
              //SE RECIBNEN 2 VARIABLES HXDCM COMO ARGUNMENTOS DE LA FUNCION 
