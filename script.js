@@ -66,7 +66,7 @@ scene.add(new THREE.AmbientLight(0xffffff, 0x1));
 
     const loader = new THREE.OBJLoader();
     loader.load(
-      'ruta/al/archivo.obj', // Ruta al archivo .obj
+      './shirt.obj', // Ruta al archivo .obj
       function (object) {
         // Agregar el objeto a la escena
         scene.add(object);
