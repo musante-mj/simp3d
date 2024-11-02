@@ -95,7 +95,7 @@ var geometry = new THREE.PlaneGeometry(10, 10, 20, 20);
 //PRIMEROS USOS DE VALORES HEXADECIMALES COMO NOMBRES DE VARIABLES (OFUSCACION)
 geometry.vertices.forEach(_0x56b6e2 => {
   _0x56b6e2.z = Math.cos(_0x56b6e2.x) * Math.sin(-_0x56b6e2.y * 0.5) * 0.5;
-/});
+});
 geometry.computeFaceNormals();
 geometry.computeVertexNormals();
 
