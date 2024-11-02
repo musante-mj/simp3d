@@ -65,26 +65,68 @@ scene.add(new THREE.AmbientLight(0xffffff, 0x1));
 ////////////////// USAMOS CANVAS DE FBRC COMO TXT EN THREE
 var canvasTexture = new THREE.CanvasTexture(cnvs);
 
+
+
+
+const loader = new OBJLoader();
+loader.load(
+  './shirt.obj', // Reemplaza con la ruta a tu archivo .obj
+  function (obj) {
+    // Aplica la textura del canvas a todos los materiales del objeto cargado
+    obj.traverse(function (child) {
+      if (child.isMesh) {
+        child.material = new THREE.MeshStandardMaterial({
+          map: canvasTexture,
+          metalness: 0.25,
+          roughness: 0.25
+        });
+      }
+    });
+
+    // Ajusta la posición o escala del modelo si es necesario
+    obj.position.set(0, 0, 0);
+    obj.scale.set(1, 1, 1);
+
+    // Agrega el modelo cargado a la escena
+    scene.add(obj);
+  },
+  // Función de progreso opcional
+  function (xhr) {
+    console.log((xhr.loaded / xhr.total) * 100 + '% cargado');
+  },
+  // Función de error
+  function (error) {
+    console.error('Error al cargar el modelo:', error);
+  }
+);
+
+
 //ARMAMOS UNA GEOMETRIA 
-var geometry = new THREE.PlaneGeometry(10, 10, 20, 20);
+//var geometry = new THREE.PlaneGeometry(10, 10, 20, 20);
+
+
 
 
 //PRIMEROS USOS DE VALORES HEXADECIMALES COMO NOMBRES DE VARIABLES (OFUSCACION)
-geometry.vertices.forEach(_0x56b6e2 => {
-  _0x56b6e2.z = Math.cos(_0x56b6e2.x) * Math.sin(-_0x56b6e2.y * 0.5) * 0.5;
-});
-geometry.computeFaceNormals();
-geometry.computeVertexNormals();
+//geometry.vertices.forEach(_0x56b6e2 => {
+//  _0x56b6e2.z = Math.cos(_0x56b6e2.x) * Math.sin(-_0x56b6e2.y * 0.5) * 0.5;
+//});
+//geometry.computeFaceNormals();
+//geometry.computeVertexNormals();
+
+
+
+
 
 //DEFINIMOS MESH CON GEOMETRIA Y TEXTURA DEL CANVAS DE FABRICJS
-var mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
-  'map': canvasTexture,
-  'metalness': 0.25,
-  'roughness': 0.25
-}));
+//var mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+//  'map': canvasTexture,
+//  'metalness': 0.25,
+//  'roughness': 0.25
+//}));
 
 //ADD A LA SCENE
-scene.add(mesh);
+//scene.add(mesh);
 
 //  MOTORCITO DE THREEJS
 // (loop de renderizado)
