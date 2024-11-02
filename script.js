@@ -17,6 +17,8 @@ canvas.on("after:render", function () {
   }
 });
 
+
+
 // Añadir texto en Fabric
 const text = new fabric.IText("Three.js\n", {
   fontSize: 40,
@@ -46,7 +48,7 @@ let camera, renderer, scene;
 scene = new THREE.Scene();
 camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 camera.position.set(0, 0, 10);
-
+var isMobile = false;
 const container = document.getElementById("renderer");
 renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -62,7 +64,7 @@ scene.add(new THREE.AmbientLight(0xffffff, 1));
 // Cargar objeto 3D en Three.js
 const loader = new OBJLoader();
 loader.load(
-  'shirt.obj',
+  './shirt.obj',
   function (object) {
     mesh = object;
     if (mesh.children && mesh.children[0].material && mesh.children[0].material.map) {
@@ -81,18 +83,6 @@ loader.load(
 
 
 
-// Crear textura de canvas de Fabric para Three.js
-const canvasTexture = new THREE.CanvasTexture(canvas.getElement());
-
-// Crear geometría y material en Three.js
-const geometry = new THREE.PlaneGeometry(10, 10, 20, 20);
-const material = new THREE.MeshStandardMaterial({
-  map: canvasTexture,
-  metalness: 0.25,
-  roughness: 0.25
-});
-mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
 
 // Loop de renderizado
 function animate() {
