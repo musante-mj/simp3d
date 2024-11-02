@@ -48,7 +48,7 @@ canvas.add(imageInstance);
 let camera, renderer, scene;
 scene = new THREE.Scene();
 camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-camera.position.set(0, 0, 10);
+camera.position.set(0, 0, 30);
 var isMobile = false;
 const container = document.getElementById("renderer");
 renderer = new THREE.WebGLRenderer({ antialias: true });
