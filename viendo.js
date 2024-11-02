@@ -62,41 +62,22 @@ var isMobile = false;
 var light = new THREE.DirectionalLight(0xffffff, 0.5);
 light.position.setScalar(10);
 scene.add(light);
-scene.add(new THREE.AmbientLight(0xffffff, 1));
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
 var canvasTexture = new THREE.CanvasTexture(cnvs);
+var geometry = new THREE.PlaneGeometry(10, 10, 20, 20);
+geometry.vertices.forEach(v => {
+  v.z = Math.cos(v.x) * Math.sin(-v.y * 0.5) * 0.5;
+});
+geometry.computeFaceNormals();
+geometry.computeVertexNormals();
 
-
-// instancia un cargador
-const loader = new OBJLoader();
-
-
-// Carga un recurso
-loader.load(
-  '/.shirt.obj',
-  function(object) {
-      // Asigna el objeto a una variable
-      const mesh = object;
-
-      // Asigna el material con la textura del canvas
-      mesh.traverse(function(child) {
-          if (child.isMesh) {
-              child.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
-          }
-      });
-
-      // Añadir el objeto a la escena
-      scene.add(mesh);
-  },
-  function(xhr) {
-      console.log((xhr.loaded / xhr.total * 100) + '% cargado');
-  },
-  function(error) {
-      console.log('Ocurrió un error al cargar el objeto');
-  }
-);
-
-
+var mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+  map: canvasTexture,
+  metalness: 0.25,
+  roughness: 0.25
+}));
+scene.add(mesh);
 
 function animateRandom(){
   var randomX = THREE.Math.randInt(50, 206);
