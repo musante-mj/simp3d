@@ -1,117 +1,132 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
-// Inicializar Fabric.js
-const canvas = new fabric.Canvas("cnvs");
+
+/////////////////////////////////////////////////////
+//FABRICJS basico
+var canvas = new fabric.Canvas("cnvs");
 canvas.backgroundColor = 'yellow';
-canvas.renderAll();
-
-let mesh;
-const mouse = new THREE.Vector2();
-const raycaster = new THREE.Raycaster();
-const onClickPosition = new THREE.Vector3();
-
-// Función para actualizar la textura en cada renderizado de Fabric
 canvas.on("after:render", function () {
-  if (mesh && mesh.material.map) {
-    mesh.material.map.needsUpdate = true;
-  }
+  mesh.material.map.needsUpdate = true;
 });
 
-
-
-// Añadir texto en Fabric
-const text = new fabric.IText("Three.js\n", {
-  fontSize: 40,
-  textAlign: "center",
-  fontWeight: 'bold',
-  left: 128,
-  top: 128,
-  angle: 30,
-  originX: "center",
-  originY: "center",
-  shadow: "blue -5px 6px 5px"
+var text = new fabric.IText("Three.js\n", {
+  'fontSize': 0x28,
+  'textAlign': "center",
+  'fontWeight': 'bold',
+  'left': 0x80,
+  'top': 0x80,
+  'angle': 0x1e,
+  'originX': "center",
+  'originY': "center",
+  'shadow': "blue -5px 6px 5px"
 });
 canvas.add(text);
 
-// Añadir imagen en Fabric
-const imgElement = document.getElementById("wiki");
-const imageInstance = new fabric.Image(imgElement, {
-  angle: 0,
-  left: 300,
-  opacity: 1,
-  cornerSize: 30
+var imgElement = document.getElementById("wiki");
+var imageinstance = new fabric.Image(imgElement, {
+  'angle': 0x0,
+  'left': 0x12c,
+  'opacity': 0x1,
+  'cornerSize': 0x1e
 });
-canvas.add(imageInstance);
-//asdasdasd
-// Inicializar Three.js
-let camera, renderer, scene;
+canvas.add(imageinstance);
+
+
+//////////////////////////////////////////////////////////
+//THREEJS basico
+var camera;
+var renderer;
+var container;
+var scene;
+var texture;
+var material;
+var geometry;
 scene = new THREE.Scene();
-camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-camera.position.set(0, 0, 30);
+camera = new THREE.PerspectiveCamera(0x3c, window.innerWidth / window.innerHeight, 0x1, 0x3e8);
+camera.position.set(0x0, 0x0, 0xa);
+var raycaster = new THREE.Raycaster();           //RAYCS
+var mouse = new THREE.Vector2();
+var onClickPosition = new THREE.Vector2();
 var isMobile = false;
-const container = document.getElementById("renderer");
-renderer = new THREE.WebGLRenderer({ antialias: true });
+container = document.getElementById("renderer");
+renderer = new THREE.WebGLRenderer({
+  'antialias': true
+});
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+camera.updateProjectionMatrix();
 container.appendChild(renderer.domElement);
-
-// Añadir iluminación en la escena de Three.js
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.setScalar(10);
+var light = new THREE.DirectionalLight(0xffffff, 0.5);
+light.position.setScalar(0xa);
 scene.add(light);
-scene.add(new THREE.AmbientLight(0xffffff, 1));
+scene.add(new THREE.AmbientLight(0xffffff, 0x1));
 
-var canvasTexture = new THREE.CanvasTexture(cnvs);
 
-// Cargar objeto 3D en Three.js
-const loader = new OBJLoader();
-loader.load(
-  './shirt.obj',
-  function (object) {
-    mesh = object;
 
-    // Verificar si el objeto tiene hijos y que el primer hijo tenga un material
-    if (mesh.children && mesh.children.length > 0) {
-      const child = mesh.children[0];
-
-      // Asignar la textura al material del primer hijo
-      if (child.material) {
-        child.material.map = canvasTexture; // Asigna la textura
-        child.material.needsUpdate = true; // Indica que el material necesita actualizarse
+    const loader = new THREE.OBJLoader();
+    loader.load(
+      'ruta/al/archivo.obj', // Ruta al archivo .obj
+      function (object) {
+        // Agregar el objeto a la escena
+        scene.add(object);
+      },
+      function (xhr) {
+        // Mostrar el progreso de carga
+        console.log((xhr.loaded / xhr.total * 100) + '% cargado');
+      },
+      function (error) {
+        // Manejo de errores
+        console.error('Error al cargar el archivo .obj', error);
       }
-    }
+    );
 
-    scene.add(mesh);
-  },
-  function (xhr) {
-    console.log((xhr.loaded / xhr.total * 100) + '% cargado');
-  },
-  function (error) {
-    console.error('Error al cargar el archivo .obj', error);
-  }
-);
+
+//aca armamos una mesh , con una geometria y la textura del canvas 
+
+////////////////// USAMOS CANVAS DE FBRC COMO TXT EN THREE
+var canvasTexture = new THREE.CanvasTexture(cnvs);
+//ARMAMOS UNA GEOMETRIA   
+var geometry = new THREE.PlaneGeometry(10, 10, 20, 20);
 
 
 
 
-
-  
-  var clock = new THREE.Clock();
-  var time = 0;
-  
-  function render() {
-	requestAnimationFrame(render);
-	time += clock.getDelta();
-	renderer.render(scene, camera);
-  }
-  
-  render();
+//PRIMEROS USOS DE VALORES HEXADECIMALES COMO NOMBRES DE VARIABLES (OFUSCACION)
+geometry.vertices.forEach(_0x56b6e2 => {
+  _0x56b6e2.z = Math.cos(_0x56b6e2.x) * Math.sin(-_0x56b6e2.y * 0.5) * 0.5;
+/});
+geometry.computeFaceNormals();
+geometry.computeVertexNormals();
 
 
 
 
 
+//DEFINIMOS MESH CON GEOMETRIA Y TEXTURA DEL CANVAS DE FABRICJS
+var mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+  'map': canvasTexture,
+  'metalness': 0.25,
+  'roughness': 0.25
+}));
+
+//ADD A LA SCENE
+scene.add(mesh);
+
+//  MOTORCITO DE THREEJS
+// (loop de renderizado)
+function animateRandom() {}
+animateRandom();
+setInterval(animateRandom, 0x3e8);
+var clock = new THREE.Clock();
+var time = 0x0;
+
+function render() {
+  requestAnimationFrame(render);
+  time += clock.getDelta();
+  renderer.render(scene, camera);
+}
+render();
 
 fabric.Canvas.prototype.getPointer = function (_0x2fd889, _0x112d2f) { 
              //SE RECIBNEN 2 VARIABLES HXDCM COMO ARGUNMENTOS DE LA FUNCION 
@@ -330,4 +345,3 @@ var getIntersects = function (_0x22e88c, _0x46e71c) {
   raycaster.setFromCamera(mouse, camera);
   return raycaster.intersectObjects(_0x46e71c);
 };
-
