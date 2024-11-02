@@ -68,7 +68,7 @@ var canvasTexture = new THREE.CanvasTexture(cnvs);
 
 
 
-const loader = new OBJLoader();
+const loader = new OBJLoader2();
 loader.load(
   './shirt.obj', // Reemplaza con la ruta a tu archivo .obj
   function (obj) {
