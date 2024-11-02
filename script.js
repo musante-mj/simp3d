@@ -61,15 +61,26 @@ light.position.setScalar(10);
 scene.add(light);
 scene.add(new THREE.AmbientLight(0xffffff, 1));
 
+var canvasTexture = new THREE.CanvasTexture(cnvs);
+
 // Cargar objeto 3D en Three.js
 const loader = new OBJLoader();
 loader.load(
   './shirt.obj',
   function (object) {
     mesh = object;
-    if (mesh.children && mesh.children[0].material && mesh.children[0].material.map) {
-      mesh.children[0].material.map.needsUpdate = true;
+
+    // Verificar si el objeto tiene hijos y que el primer hijo tenga un material
+    if (mesh.children && mesh.children.length > 0) {
+      const child = mesh.children[0];
+
+      // Asignar la textura al material del primer hijo
+      if (child.material) {
+        child.material.map = canvasTexture; // Asigna la textura
+        child.material.needsUpdate = true; // Indica que el material necesita actualizarse
+      }
     }
+
     scene.add(mesh);
   },
   function (xhr) {
@@ -79,6 +90,7 @@ loader.load(
     console.error('Error al cargar el archivo .obj', error);
   }
 );
+
 
 
 
