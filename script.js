@@ -43,7 +43,7 @@ const imageInstance = new fabric.Image(imgElement, {
   cornerSize: 30
 });
 canvas.add(imageInstance);
-
+//asdasdasd
 // Inicializar Three.js
 let camera, renderer, scene;
 scene = new THREE.Scene();
