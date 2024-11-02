@@ -96,14 +96,6 @@ loader.load(
 
 
 
-
-function animateRandom(){
-	var randomX = THREE.Math.randInt(50, 206);
-	var randomY = THREE.Math.randInt(50, 206);
-  }
-  
-  animateRandom();
-  setInterval(animateRandom, 1000);
   
   var clock = new THREE.Clock();
   var time = 0;
