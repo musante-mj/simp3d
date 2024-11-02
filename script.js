@@ -60,7 +60,7 @@ scene.add(light);
 scene.add(new THREE.AmbientLight(0xffffff, 1));
 
 // Cargar objeto 3D en Three.js
-const loader = new THREE.OBJLoader();
+const loader = new OBJLoader();
 loader.load(
   'shirt.obj',
   function (object) {
