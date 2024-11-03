@@ -23,18 +23,19 @@
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
     let camera, scene, renderer, object, texture;
     
     // Inicializa Fabric.js y crea el canvas
     var canvas = new fabric.Canvas('cnvs');
-    canvas.backgroundColor = 'yellow'; // Fondo blanco para evitar transparencias
+    canvas.backgroundColor = 'yellow';
     var rect = new fabric.Rect({ left: 256, top: 256, fill: 'red', width: 100, height: 100 });
     canvas.add(rect);
     canvas.renderAll();
     
     // Configura la textura de Three.js usando el canvas de Fabric
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
-    texture.needsUpdate = true; // Forzar actualización inicial
+    texture.needsUpdate = true;
     texture.premultiplyAlpha = false;
     texture.minFilter = THREE.LinearFilter;
     
@@ -84,7 +85,7 @@
       });
 
       // Fusiona las geometrías en una sola
-      const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+      const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
       
       // Crea un solo Mesh con la geometría fusionada y aplica la textura
       const mergedMesh = new THREE.Mesh(mergedGeometry, new THREE.MeshBasicMaterial({ map: texture }));
