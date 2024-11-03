@@ -42,22 +42,27 @@
       
   
  
-// reference canvas element (with id="c")
-var canvas = document.getElementById("cnvs");
 
-// get 2d context to draw on (the "bitmap" mentioned earlier)
-var ctx = canvas.getContext('2d');
+var canvas = new fabric.Canvas('cnvs');
 
-// set fill color of context
-ctx.fillStyle = 'red';
+// create a rectangle with angle=45
+var rect = new fabric.Rect({
+  left: 100,
+  top: 100,
+  fill: 'red',
+  width: 20,
+  height: 20,
+  angle: 45
+});
 
-// create rectangle at a 100,100 point, with 20x20 dimensions
-ctx.fillRect(100, 100, 20, 20);
-
+canvas.add(rect);
 
       
         texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
 
+        canvas.on("after:render", function() {
+          texture.needsUpdate = true;
+        });
       
         
 
