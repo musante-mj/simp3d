@@ -47,7 +47,7 @@
  var canvas = new fabric.Canvas( "cnvs" );
     canvas.backgroundColor = "yellow";
     canvas.on("after:render", function() {
-        mesh.material.map.needsUpdate = true;
+        object.material.map.needsUpdate = true;
     });
 
 var text = new fabric.IText('Three.js\n', {
