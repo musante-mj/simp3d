@@ -22,7 +22,8 @@
     import * as THREE from 'three';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    
+    import { BufferGeometryUtils } from 'three/addons/utils/BufferGeometryUtils.js';
+
     let camera, scene, renderer, object, texture;
     
     // Inicializa Fabric.js y crea el canvas
@@ -37,8 +38,6 @@
     texture.needsUpdate = true; // Forzar actualización inicial
     texture.premultiplyAlpha = false;
     texture.minFilter = THREE.LinearFilter;
-    //texture.wrapS = THREE.ClampToEdgeWrapping;
-    //texture.wrapT = THREE.ClampToEdgeWrapping;
     
     canvas.on("after:render", function() {
       texture.needsUpdate = true;
@@ -77,16 +76,24 @@
     }
     
     function loadModel() {
+      // Recoge todas las geometrías de los children del objeto
+      const geometries = [];
       object.traverse(function(child) {
         if (child.isMesh) {
-          child.material = new THREE.MeshBasicMaterial({ map: texture });
-          //child.material.map.repeat.set(1, 1);
-          //child.geometry.computeVertexNormals();
+          geometries.push(child.geometry);
         }
       });
-      object.position.y = -0.95;
-      object.scale.setScalar(0.01);
-      scene.add(object);
+
+      // Fusiona las geometrías en una sola
+      const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+      
+      // Crea un solo Mesh con la geometría fusionada y aplica la textura
+      const mergedMesh = new THREE.Mesh(mergedGeometry, new THREE.MeshBasicMaterial({ map: texture }));
+      mergedMesh.position.y = -0.95;
+      mergedMesh.scale.setScalar(0.01);
+
+      // Añade el Mesh fusionado a la escena
+      scene.add(mergedMesh);
     }
     
     function onProgress(xhr) {
