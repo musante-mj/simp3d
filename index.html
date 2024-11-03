@@ -55,8 +55,7 @@
         canvas.add(text);
       
         texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
-        texture.colorSpace = THREE.SRGBColorSpace;
-      
+              
         canvas.on("after:render", function() {
           texture.needsUpdate = true;
         });
