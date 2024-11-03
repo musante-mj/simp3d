@@ -40,28 +40,30 @@
       
         let camera, scene, renderer, object, texture;
       
-        const canvas = new fabric.Canvas("cnvs");
-        canvas.backgroundColor = "yellow";
-      
-        const text = new fabric.IText('Three.js\n', {
-          fontSize: 40,
-          textAlign: 'center',
-          fontWeight: 'bold',
-          left: 128,
-          top: 128,
-          angle: 30,
-          originX: 'center',
-          originY: 'center',
-          shadow: 'blue -5px 6px 5px'
-        });
-        canvas.add(text);
+  
+ 
+// reference canvas element (with id="c")
+var canvasEl = document.getElementById("cnvs");
+
+// get 2d context to draw on (the "bitmap" mentioned earlier)
+var ctx = canvasEl.getContext('2d');
+
+// set fill color of context
+ctx.fillStyle = 'red';
+
+// create rectangle at a 100,100 point, with 20x20 dimensions
+ctx.fillRect(100, 100, 20, 20);
+
+
       
         texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
 
         canvas.on("after:render", function() {
           texture.needsUpdate = true;
         });
+      
         
+
       
         init();
       
