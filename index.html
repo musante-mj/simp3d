@@ -1,43 +1,190 @@
-<!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>CodePen - A Pen by naonvl</title>
-  <link rel="stylesheet" href="./style.css">
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <title>three.js webgl - loaders - OBJ loader</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+      <link type="text/css" rel="stylesheet" href="main.css">
+      <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
+          }
+        }
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" integrity="sha512-CeIsOAsgJnmevfCi2C7Zsyy6bQKi43utIjdA87Q0ZY84oDqnI0uwfM9+bKiIkI75lUeI00WG/+uJzOmuHlesMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    </head>
 
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
-      }
-    }
-  </script>
+    
 
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.1/dat.gui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/2.2.1/fabric.min.js"></script>
-
-
-<link rel="stylesheet" href="./main.css">
-
-    <canvas style="display: none;" id="canvas" height="1024" width="1024" style="width: 0;height: 0;"></canvas>
-
-<img  id="wiki" src="./asd.png" width="192" height="192" />
-
-<div id="renderer">
-</div>
+    <body>
+ 
+      <div id="canvas_container">
+        <canvas id="cnvs" height="512" width="512"></canvas>
+      </div>
 
 
-<br />
-<div id="canvas_container">
-  <canvas id="cnvs" height="512" width="512"></canvas>
 
-</div>
-<!-- partial -->
-<script type="module" src="/script.js"></script>
+      <div id="info">
+      <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader test
+      </div>
+ 
+  
+      <script type="module">
+  
+        import * as THREE from 'three';
+  
+        import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  
 
-</body>
-</html>
+/**
+ * FabricJS  
+ **/
+
+ var canvas = new fabric.Canvas( "cnvs" );
+    canvas.backgroundColor = "yellow";
+    canvas.on("after:render", function() {
+        mesh.material.map.needsUpdate = true;
+    });
+
+var text = new fabric.IText('Three.js\n', {
+  fontSize: 40,
+  textAlign: 'center',
+  fontWeight: 'bold',
+  left: 128,
+  top: 128,
+  angle: 30,
+  originX: 'center',
+  originY: 'center',
+  shadow: 'blue -5px 6px 5px'   
+});
+canvas.add(text);
+
+
+        let camera, scene, renderer;
+  
+        let object;
+  
+        init();
+  
+        function init() {
+  
+          camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 20 );
+          camera.position.z = 2.5;
+  
+          // scene
+  
+          scene = new THREE.Scene();
+  
+          const ambientLight = new THREE.AmbientLight( 0xffffff );
+          scene.add( ambientLight );
+  
+          const pointLight = new THREE.PointLight( 0xffffff, 15 );
+          camera.add( pointLight );
+          scene.add( camera );
+  
+          // manager
+  
+          function loadModel() {
+  
+            object.traverse( function ( child ) {
+  
+              if ( child.isMesh ) child.material.map = texture;
+  
+            } );
+  
+            object.position.y = - 0.95;
+            object.scale.setScalar( 0.01 );
+            scene.add( object );
+  
+            render();
+  
+          }
+  
+          const manager = new THREE.LoadingManager( loadModel );
+  
+          // texture
+  
+
+          //const textureLoader = new THREE.TextureLoader( manager );
+          //const texture = textureLoader.load( 'textures/uv_grid_opengl.jpg', render );
+          //texture.colorSpace = THREE.SRGBColorSpace;
+  
+
+
+          const texture = new THREE.CanvasTexture(cnvs);
+
+
+
+
+
+
+
+          // model
+  
+          function onProgress( xhr ) {
+  
+            if ( xhr.lengthComputable ) {
+  
+              const percentComplete = xhr.loaded / xhr.total * 100;
+              console.log( 'model ' + percentComplete.toFixed( 2 ) + '% downloaded' );
+  
+            }
+  
+          }
+  
+          function onError() {}
+  
+          const loader = new OBJLoader( manager );
+          loader.load( './shirt.obj', function ( obj ) {
+  
+            object = obj;
+  
+          }, onProgress, onError );
+  
+          //
+  
+          renderer = new THREE.WebGLRenderer( { antialias: true } );
+          renderer.setPixelRatio( window.devicePixelRatio );
+          renderer.setSize( window.innerWidth, window.innerHeight );
+          document.body.appendChild( renderer.domElement );
+  
+          //
+  
+          const controls = new OrbitControls( camera, renderer.domElement );
+          controls.minDistance = 2;
+          controls.maxDistance = 5;
+          controls.addEventListener( 'change', render );
+  
+          //
+  
+          window.addEventListener( 'resize', onWindowResize );
+  
+        }
+  
+        function onWindowResize() {
+  
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+  
+          renderer.setSize( window.innerWidth, window.innerHeight );
+  
+        }
+  
+        function render() {
+  
+          renderer.render( scene, camera );
+  
+        }
+  
+      </script>
+  
+
+
+
+
+    </body>
+  </html>
