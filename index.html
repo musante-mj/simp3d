@@ -84,7 +84,7 @@ canvas.on("after:render", function() {
       object.traverse(function(child) {
         if (child.isMesh) {
           child.material = new THREE.MeshBasicMaterial({ map: texture });
-          child.geometry.computeVertexNormals();
+ 
         }
       });
       object.position.y = -0.95;
