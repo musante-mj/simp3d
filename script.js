@@ -30,25 +30,6 @@ scene.add(light);
 scene.add(new THREE.AmbientLight(0xffffff, 0x1));
 
 
-
-    const loader = new THREE.OBJLoader();
-    loader.load(
-      './shirt.obj', // Ruta al archivo .obj
-      function (object) {
-        // Agregar el objeto a la escena
-        scene.add(object);
-      },
-      function (xhr) {
-        // Mostrar el progreso de carga
-        console.log((xhr.loaded / xhr.total * 100) + '% cargado');
-      },
-      function (error) {
-        // Manejo de errores
-        console.error('Error al cargar el archivo .obj', error);
-      }
-    );
-
-
 //aca armamos una mesh , con una geometria y la textura del canvas 
 
 ////////////////// USAMOS CANVAS DE FBRC COMO TXT EN THREE
