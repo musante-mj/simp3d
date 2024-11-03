@@ -36,8 +36,6 @@
 
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
 texture.needsUpdate = true;
-texture.premultiplyAlpha = false; // Evita problemas de mezcla de color
-texture.minFilter = THREE.LinearFilter; // Asegura un filtrado suave para texturas de baja resolución
 texture.wrapS = THREE.ClampToEdgeWrapping;
 
 canvas.on("after:render", function() {
