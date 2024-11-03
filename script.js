@@ -28,7 +28,32 @@ var light = new THREE.DirectionalLight(0xffffff, 0.5);
 light.position.setScalar(0xa);
 scene.add(light);
 scene.add(new THREE.AmbientLight(0xffffff, 0x1));
+// instantiate a loader
+const loader = new OBJLoader();
 
+// load a resource
+loader.load(
+	// resource URL
+	'./shirt.obj',
+	// called when resource is loaded
+	function ( object ) {
+
+		scene.add( object );
+
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+
+		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+	},
+	// called when loading has errors
+	function ( error ) {
+
+		console.log( 'An error happened' );
+
+	}
+);
 
 //aca armamos una mesh , con una geometria y la textura del canvas 
 
