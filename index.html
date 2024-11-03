@@ -9,11 +9,11 @@
         {
           "imports": {
             "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/",
-            "fabric": "https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
           }
         }
       </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" ></script>
     
     </head>
 
@@ -37,12 +37,8 @@
         import * as THREE from 'three';
         import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import * as fabric from 'fabric';
-
-
-
+      
         let camera, scene, renderer, object, texture;
-
       
         const canvas = new fabric.Canvas("cnvs");
         canvas.backgroundColor = "yellow";
