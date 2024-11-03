@@ -26,6 +26,9 @@
       </div>
 
 
+      <div id="threejscanvas">
+
+      </div>
 
       <div id="info">
       <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader test
@@ -55,10 +58,11 @@
         canvas.add(text);
       
         texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
-              
+
         canvas.on("after:render", function() {
           texture.needsUpdate = true;
         });
+        
       
         init();
       
@@ -82,10 +86,31 @@
             object = obj;
           }, onProgress, onError);
       
-          renderer = new THREE.WebGLRenderer({ antialias: true });
-          renderer.setPixelRatio(window.devicePixelRatio);
-          renderer.setSize(window.innerWidth, window.innerHeight);
-          document.body.appendChild(renderer.domElement);
+          //renderer = new THREE.WebGLRenderer({ antialias: true });
+          //renderer.setPixelRatio(window.devicePixelRatio);
+          //renderer.setSize(window.innerWidth, window.innerHeight);
+          //document.body.appendChild(renderer.domElement);
+
+// Crear el renderer de Three.js con antialiasing
+renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+
+// Configurar el tamaño del renderer
+const container = document.getElementById("threejscanvas");
+renderer.setSize(container.clientWidth, container.clientHeight);
+
+// Agregar el renderer a la div "threejscanvas"
+container.appendChild(renderer.domElement);
+
+// Opcional: actualizar el tamaño del renderer cuando cambie el tamaño de la ventana
+window.addEventListener("resize", () => {
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+});
+
+
+
+          
       
           const controls = new OrbitControls(camera, renderer.domElement);
           controls.minDistance = 2;
