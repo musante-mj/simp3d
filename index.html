@@ -78,10 +78,21 @@
     
     function loadModel() {
       object.traverse(function(child) {
+
+     
+
         if (child.isMesh) {
-          child.material = new THREE.MeshBasicMaterial({ map: texture });
-          child.material.map.repeat.set(1, 1);
-          child.geometry.computeVertexNormals();
+          //child.material = new THREE.MeshBasicMaterial({ map: texture });
+          //child.material.map.repeat.set(1, 1);
+          //child.geometry.computeVertexNormals();
+          
+          textureMaterial = new THREE.MeshPhongMaterial({
+    'map': texture
+  });
+   child.material.map = textureMaterial;
+
+
+
         }
       });
       object.position.y = -0.95;
