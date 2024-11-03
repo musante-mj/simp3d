@@ -100,14 +100,14 @@ renderer.setPixelRatio(window.devicePixelRatio);
 
 // Configurar el tamaño del renderer
 const container = document.getElementById("threejscanvas");
-renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setSize(512, 512);
 
 // Agregar el renderer a la div "threejscanvas"
 container.appendChild(renderer.domElement);
 
 // Opcional: actualizar el tamaño del renderer cuando cambie el tamaño de la ventana
 window.addEventListener("resize", () => {
-  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setSize(512, 512);
   renderer.setPixelRatio(window.devicePixelRatio);
 });
 
@@ -122,6 +122,8 @@ window.addEventListener("resize", () => {
           window.addEventListener('resize', onWindowResize);
           animate();
         }
+
+
       
         function loadModel() {
           object.traverse(function(child) {
