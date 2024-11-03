@@ -35,11 +35,7 @@
     canvas.renderAll();
     
     // Configura la textura de Three.js usando el canvas de Fabric
-    texture = new THREE.CanvasTexture(document.getElementById(cnvs));
-    texture.needsUpdate = true;
-    texture.premultiplyAlpha = false;
-    texture.minFilter = THREE.LinearFilter;
-    
+    texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
     canvas.on("after:render", function() {
       texture.needsUpdate = true;
     });
