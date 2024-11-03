@@ -1,170 +1,106 @@
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <title>three.js webgl - loaders - OBJ loader</title>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-      <link type="text/css" rel="stylesheet" href="main.css">
-      <script type="importmap">
-        {
-          "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
-          }
-        }
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" ></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Three.js con Fabric.js</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+</head>
+<body>
+  <div id="threejscanvas"></div>
+  <canvas id="cnvs" height="512" width="512"></canvas>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     
-    </head>
-
+    let camera, scene, renderer, object, texture;
     
+    // Inicializa Fabric.js y crea el canvas
+    var canvas = new fabric.Canvas('cnvs');
+    var rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 20, height: 20, angle: 45 });
+    canvas.add(rect);
+    canvas.renderAll();
+    
+    // Configura la textura de Three.js usando el canvas de Fabric
+    texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
+    texture.needsUpdate = true; // Forzar actualización inicial
+    canvas.on("after:render", function() {
+      texture.needsUpdate = true;
+    });
+    
+    init();
+    
+    function init() {
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20);
+      camera.position.z = 2.5;
+    
+      scene = new THREE.Scene();
+      scene.add(new THREE.AmbientLight(0xffffff));
+    
+      const pointLight = new THREE.PointLight(0xffffff, 15);
+      camera.add(pointLight);
+      scene.add(camera);
+    
+      const manager = new THREE.LoadingManager(loadModel);
+      const loader = new OBJLoader(manager);
+      loader.load('./shirt.obj', function(obj) {
+        object = obj;
+      }, onProgress, onError);
 
-    <body>
- 
-
-
-      <div id="threejscanvas">
-      </div>
-
-      <div id="info">
-      asdasd</div>
- 
-
-
-      <div id="canvas_container">
-        <canvas id="cnvs" height="512" width="512"></canvas>
-      </div>
-
-
-
-
-      <script type="module">
-        import * as THREE from 'three';
-        import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(512, 512);
+      document.getElementById("threejscanvas").appendChild(renderer.domElement);
       
-        let camera, scene, renderer, object, texture;
-      
-  
- 
-
-var canvas = new fabric.Canvas('cnvs');
-
-// create a rectangle with angle=45
-var rect = new fabric.Rect({
-  left: 100,
-  top: 100,
-  fill: 'red',
-  width: 20,
-  height: 20,
-  angle: 45
-});
-
-canvas.add(rect);
-canvas.renderAll();
-      
-        texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
-        canvas.on("after:render", function() {
-          texture.needsUpdate = true;
-        });
-      
-        
-
-      
-         init();
-      
-        function init() {
-          camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20);
-          camera.position.z = 2.5;
-      
-          scene = new THREE.Scene();
-      
-          const ambientLight = new THREE.AmbientLight(0xffffff);
-          scene.add(ambientLight);
-      
-          const pointLight = new THREE.PointLight(0xffffff, 15);
-          camera.add(pointLight);
-          scene.add(camera);
-      
-          const manager = new THREE.LoadingManager(loadModel);
-      
-          const loader = new OBJLoader(manager);
-          loader.load('./shirt.obj', function(obj) {
-            object = obj;
-          }, onProgress, onError);
-      
-          //renderer = new THREE.WebGLRenderer({ antialias: true });
-          //renderer.setPixelRatio(window.devicePixelRatio);
-          //renderer.setSize(window.innerWidth, window.innerHeight);
-          //document.body.appendChild(renderer.domElement);
-
-// Crear el renderer de Three.js con antialiasing
-renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-
-// Configurar el tamaño del renderer
-const container = document.getElementById("threejscanvas");
-renderer.setSize(512, 512);
-
-// Agregar el renderer a la div "threejscanvas"
-container.appendChild(renderer.domElement);
-
-// Opcional: actualizar el tamaño del renderer cuando cambie el tamaño de la ventana
-window.addEventListener("resize", () => {
-  renderer.setSize(512, 512);
-  renderer.setPixelRatio(window.devicePixelRatio);
-});
-
-
-
-          
-      
-          const controls = new OrbitControls(camera, renderer.domElement);
-          controls.minDistance = 2;
-          controls.maxDistance = 5;
-      
-          window.addEventListener('resize', onWindowResize);
-          animate();
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.minDistance = 2;
+      controls.maxDistance = 5;
+    
+      window.addEventListener('resize', onWindowResize);
+      animate();
+    }
+    
+    function loadModel() {
+      object.traverse(function(child) {
+        if (child.isMesh) {
+          child.material = new THREE.MeshBasicMaterial({ map: texture });
+          child.geometry.computeVertexNormals();
         }
-
-
-      
-        function loadModel() {
-          object.traverse(function(child) {
-            if (child.isMesh) {
-              child.material.map = texture;
-              child.geometry.computeVertexNormals();
-            }
-          });
-          object.position.y = -0.95;
-          object.scale.setScalar(0.01);
-          scene.add(object);
-        }
-      
-        function onProgress(xhr) {
-          if (xhr.lengthComputable) {
-            const percentComplete = (xhr.loaded / xhr.total) * 100;
-            console.log('model ' + percentComplete.toFixed(2) + '% downloaded');
-          }
-        }
-      
-        function onError() {}
-      
-        function onWindowResize() {
-          camera.aspect = window.innerWidth / window.innerHeight;
-          camera.updateProjectionMatrix();
-          renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-      
-        function animate() {
-          requestAnimationFrame(animate);
-          renderer.render(scene, camera);
-        }
-      </script>
-      
-
-
-
-
-    </body>
-  </html>
+      });
+      object.position.y = -0.95;
+      object.scale.setScalar(0.01);
+      scene.add(object);
+    }
+    
+    function onProgress(xhr) {
+      if (xhr.lengthComputable) {
+        const percentComplete = (xhr.loaded / xhr.total) * 100;
+        console.log('Modelo ' + percentComplete.toFixed(2) + '% descargado');
+      }
+    }
+    
+    function onError() {}
+    
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
