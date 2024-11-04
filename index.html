@@ -68,7 +68,7 @@ fabricCanvas.add(text);
     './shirt_s.obj',
     (object) => {
       object.traverse((child) => {
-      //  if (child.isMesh) {
+        if (child.isMesh) {
           // Imprime información sobre el mesh o nodo
           console.log("Mesh Info:", {
             name: child.name,
@@ -85,7 +85,7 @@ fabricCanvas.add(text);
           }
 
           clickableMeshes.push(child);
-       // }
+        }
       });
       object.position.set(0, 0, 0); // Centra el modelo
       object.scale.set(0.025, 0.025, 0.025); // Ajusta la escala si es necesario
