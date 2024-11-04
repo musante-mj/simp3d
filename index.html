@@ -162,7 +162,7 @@
       onClick({ clientX: mouse.x * window.innerWidth / 2, clientY: mouse.y * window.innerHeight / 2 });
     }
 
-    window.removeDecal = function() {
+   function removeDecal() {
       if (decalApplied && decalMesh) {
         scene.remove(decalMesh);
         decalApplied = false;
