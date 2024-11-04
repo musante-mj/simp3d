@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Three.js con Fabric.js y GLTFLoader</title>
+  <title>Three.js with Fabric.js and OBJLoader</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="importmap">
@@ -20,34 +20,50 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
-    let camera, scene, renderer, model, texture;
+    let camera, scene, renderer, texture;
 
-    // Inicializa Fabric.js y crea el canvas
-    var canvas = new fabric.Canvas('cnvs');
-    canvas.backgroundColor = 'yellow';
-    var rect = new fabric.Rect({ left: 256, top: 256, fill: 'red', width: 100, height: 100 });
-    canvas.add(rect);
-    canvas.renderAll();
+    // Initialize Fabric.js and create the canvas
+    const fabricCanvas = new fabric.Canvas('cnvs');
+    fabricCanvas.backgroundColor = 'yellow';
+    const rect = new fabric.Rect({ left: 256, top: 256, fill: 'red', width: 100, height: 100 });
+    fabricCanvas.add(rect);
+    fabricCanvas.renderAll();
 
-    // Configura la textura de Three.js usando el canvas de Fabric
+    // Set up the Three.js texture using the Fabric canvas
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
     texture.premultiplyAlpha = false;
     texture.minFilter = THREE.LinearFilter;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 2); // Ajusta la repetición de la textura para cubrir más áreas
+    texture.repeat.set(2, 2); // Adjust texture repetition to cover larger areas
 
-    // Actualiza la textura cuando el canvas de Fabric.js cambia
-    canvas.on("after:render", function() {
+    // Update the texture when the Fabric canvas changes
+    fabricCanvas.on("after:render", () => {
       texture.needsUpdate = true;
     });
 
     init();
 
+    // Load OBJ model and add it to the scene
+    function loadModel() {
+      const loader = new OBJLoader();
+      loader.load(
+        './shirt.obj',
+        (object) => {
+          object.traverse((child) => {
+            if (child.isMesh) child.material.map = texture; // Apply texture to the model
+          });
+          scene.add(object);
+        },
+        (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
+        (error) => console.error('Error loading the model', error)
+      );
+    }
+
     function init() {
-      // Configura la cámara y la escena
+      // Set up the camera and scene
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20);
       camera.position.set(0, 1.5, 3);
 
@@ -58,23 +74,7 @@
       camera.add(pointLight);
       scene.add(camera);
 
-      // Carga el modelo GLTF
-      const loader = new GLTFLoader();
-      loader.load('./shirt.gltf', function(gltf) {
-        model = gltf.scene;
-
-        // Aplica la textura a todos los materiales del modelo
-        model.traverse(function(child) {
-          if (child.isMesh) {
-            child.material.map = texture;
-            child.material.needsUpdate = true;
-          }
-        });
-
-        scene.add(model);
-      }, onProgress, onError);
-
-      // Configura el renderer
+      // Set up the renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -84,19 +84,10 @@
       controls.minDistance = 2;
       controls.maxDistance = 5;
 
+      loadModel();
+
       window.addEventListener('resize', onWindowResize);
       animate();
-    }
-
-    function onProgress(xhr) {
-      if (xhr.lengthComputable) {
-        const percentComplete = (xhr.loaded / xhr.total) * 100;
-        console.log('Modelo ' + percentComplete.toFixed(2) + '% descargado');
-      }
-    }
-
-    function onError(error) {
-      console.error('Error al cargar el modelo', error);
     }
 
     function onWindowResize() {
