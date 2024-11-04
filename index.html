@@ -85,23 +85,7 @@
         }
       });
 
-      if (geometries.length > 0) {
-        
-        console.log("pudo");
-        // Fusiona las geometrías en una sola
-        const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
-        mergedGeometry.computeBoundingBox();
-        mergedGeometry.computeBoundingSphere();
-
-        // Crea un solo Mesh con la geometría fusionada y aplica la textura
-        const mergedMesh = new THREE.Mesh(mergedGeometry,
-         new THREE.MeshStandardMaterial({ map: texture }));
-        mergedMesh.position.y = -0.95;
-        mergedMesh.scale.setScalar(0.005);
-
-        // Añade el Mesh fusionado a la escena
-        scene.add(mergedMesh);
-      } else {
+      
         console.log("nopudo");
         // Si no se puede fusionar, aplica la textura individualmente a cada submalla
         object.traverse(function(child) {
@@ -111,7 +95,7 @@
           }
         });
       }
-    }
+    
     
     function onProgress(xhr) {
       if (xhr.lengthComputable) {
