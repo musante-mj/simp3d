@@ -75,32 +75,38 @@
       window.addEventListener('resize', onWindowResize);
       animate();
     }
-    
     function loadModel() {
     // Recoge todas las geometrías de los children del objeto
     const geometries = [];
     object.traverse(function(child) {
         if (child.isMesh && child.geometry) {
+            if (!child.geometry.index) {
+                child.geometry.setIndex(child.geometry.getAttribute('position').array);
+            }
             geometries.push(child.geometry);
         } else {
-            console.warn("Se encontró un child que no es una malla válida:", child);
+            console.warn("Elemento ignorado, no es una malla:", child.type, child);
         }
     });
 
     if (geometries.length > 0) {
         // Fusiona las geometrías en una sola
-        const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
-        mergedGeometry.computeBoundingBox();
-        mergedGeometry.computeBoundingSphere();
+        try {
+            const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
+            mergedGeometry.computeBoundingBox();
+            mergedGeometry.computeBoundingSphere();
 
-        // Crea un solo Mesh con la geometría fusionada y aplica la textura
-        const mergedMesh = new THREE.Mesh(mergedGeometry,
-            new THREE.MeshStandardMaterial({ map: texture }));
-        mergedMesh.position.y = -0.95;
-        mergedMesh.scale.setScalar(0.005);
+            // Crea un solo Mesh con la geometría fusionada y aplica la textura
+            const mergedMesh = new THREE.Mesh(mergedGeometry,
+                new THREE.MeshStandardMaterial({ map: texture }));
+            mergedMesh.position.y = -0.95;
+            mergedMesh.scale.setScalar(0.005);
 
-        // Añade el Mesh fusionado a la escena
-        scene.add(mergedMesh);
+            // Añade el Mesh fusionado a la escena
+            scene.add(mergedMesh);
+        } catch (error) {
+            console.error("Error al fusionar geometrías:", error);
+        }
     } else {
         console.error("No hay geometrías para fusionar.");
         // Si no se puede fusionar, aplica la textura individualmente a cada submalla
@@ -112,6 +118,7 @@
         });
     }
 }
+
     function onProgress(xhr) {
       if (xhr.lengthComputable) {
         const percentComplete = (xhr.loaded / xhr.total) * 100;
