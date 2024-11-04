@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Three.js with Fabric.js and OBJLoader</title>
+  <title>Three.js Decal Example</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="importmap">
@@ -17,8 +17,8 @@
 <body>
   <div id="threejscanvas" style="width: 100%; height: 50vh;"></div>
   <canvas id="cnvs" height="512" width="512"></canvas>
-  <button onclick="applyDecal()">Apply Decal</button>
-  <button onclick="removeDecal()">Remove Decal</button>
+  <button id="apply-decal">Apply Decal</button>
+  <button id="remove-decal">Remove Decal</button>
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -65,8 +65,8 @@
         './shirt_s.obj',
         (object) => {
           object.traverse((child) => {
-            if (child.isMesh && child.name !== 'Cap_11') {
-              child.material = new THREE.MeshBasicMaterial({  color: 0xaaaaaa });
+            if (child.isMesh) {
+              child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
               clickableMeshes.push(child);
             }
           });
@@ -103,6 +103,11 @@
 
       window.addEventListener('resize', onWindowResize);
       window.addEventListener('click', onClick, false);
+      
+      // Bind button actions
+      document.getElementById("apply-decal").onclick = applyDecal;
+      document.getElementById("remove-decal").onclick = removeDecal;
+
       animate();
     }
 
@@ -118,45 +123,48 @@
     }
 
     function onClick(event) {
-      // Calcular la posición del mouse en el espacio de la ventana
+      // Calculate mouse position in normalized device coordinates
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-      // Actualizar el raycaster con la cámara y la posición del mouse
+      // Update the raycaster with the camera and mouse position
       raycaster.setFromCamera(mouse, camera);
 
-      // Calcular las intersecciones
+      // Calculate intersections
       const intersects = raycaster.intersectObjects(clickableMeshes);
 
       if (intersects.length > 0) {
         const intersect = intersects[0];
-        const position = intersect.point; // La posición donde se hizo clic
-        const orientation = new THREE.Euler(0, 0, 0); // Ajusta la orientación si es necesario
-        const size = new THREE.Vector3(0.5, 0.5, 0.01); // Tamaño del decal
+        const position = intersect.point; // The position where clicked
+        const orientation = new THREE.Euler(0, 0, 0); // Adjust orientation if necessary
+        const size = new THREE.Vector3(0.5, 0.5, 0.01); // Size of the decal
 
-        // Aplicar el decal
+        // Apply the decal
         applyDecal(position, orientation, size);
       }
     }
 
     function applyDecal(position, orientation, size) {
       if (!decalApplied) {
-        const mesh = clickableMeshes[0]; // Usa el primer mesh clickable
+        const mesh = clickableMeshes[0]; // Use the first clickable mesh
         const decalGeometry = new DecalGeometry(mesh, position, orientation, size);
         const decalMaterial = new THREE.MeshBasicMaterial({ map: texture, depthWrite: false });
-        decalMesh = new THREE.Mesh(decalGeometry, decalMaterial);
         
+        decalMesh = new THREE.Mesh(decalGeometry, decalMaterial);
         scene.add(decalMesh);
         decalApplied = true;
       }
     }
 
-    window.removeDecal = function() {
+    function removeDecal() {
       if (decalApplied && decalMesh) {
         scene.remove(decalMesh);
+        decalMesh.geometry.dispose(); // Dispose of the geometry
+        decalMesh.material.dispose(); // Dispose of the material
+        decalMesh = null; // Clear the reference
         decalApplied = false;
       }
-    };
+    }
   </script>
 </body>
 </html>
