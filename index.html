@@ -66,7 +66,7 @@
         (object) => {
           object.traverse((child) => {
             if (child.isMesh) {
-              child.material = new THREE.MeshBasicMaterial({  color: 0xaaaaaa });
+              child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
               clickableMeshes.push(child);
             }
           });
@@ -136,10 +136,10 @@
       if (intersects.length > 0) {
         const intersect = intersects[0];
         const position = intersect.point; // The position where clicked
-        const orientation = new THREE.Euler(0, 0, 0); // Adjust orientation if necessary
+        const orientation = new THREE.Euler(0, 0, 0); // Default orientation
         const size = new THREE.Vector3(0.5, 0.5, 0.01); // Size of the decal
 
-        // Apply the decal
+        // Apply the decal using the position, orientation, and size
         applyDecal(position, orientation, size);
       }
     }
