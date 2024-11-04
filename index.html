@@ -17,7 +17,7 @@
 </head>
 <body>
   <div id="threejscanvas"></div>
-  <canvas id="cnvs" height="512" width="512"></canvas>
+  <canvas id="cnvs" height="1024" width="1024"></canvas>
 
   <script type="module">
     import * as THREE from 'three';
@@ -87,8 +87,9 @@ texture.repeat.set( 2, 2 );
       });
 
       // Fusiona las geometrías en una sola
-      const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
-      
+      const mergedGeometry2 = BufferGeometryUtils.mergeGeometries(geometries);
+      const mergedGeometry = mergedGeometry2.computeVertexNormals();
+
       // Crea un solo Mesh con la geometría fusionada y aplica la textura
       const mergedMesh = new THREE.Mesh(mergedGeometry,
        new THREE.MeshBasicMaterial({ map: texture }));
