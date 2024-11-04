@@ -28,7 +28,20 @@
     const fabricCanvas = new fabric.Canvas('cnvs');
     fabricCanvas.backgroundColor = 'yellow';
     const rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 200, height: 200 });
+
     fabricCanvas.add(rect);
+    
+    
+    
+// Crear un texto
+const text = new fabric.Text('Hola, mundo!', { 
+  left: 150, 
+  top: 50, 
+  fontSize: 24, 
+  fill: 'blue' // Color del texto
+});
+fabricCanvas.add(text);
+    
     fabricCanvas.renderAll();
 
     // Set up the Three.js texture using the Fabric canvas
