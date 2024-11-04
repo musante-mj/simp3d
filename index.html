@@ -17,115 +17,116 @@
 <body>
   <div id="threejscanvas"></div>
   <canvas id="cnvs" height="512" width="512"></canvas>
-  <script type="module">
-    import * as THREE from 'three';
+  <script type="module">import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-
-    let camera, scene, renderer, texture;
-
-    // Initialize Fabric.js and create the canvas
-    const fabricCanvas = new fabric.Canvas('cnvs');
-    fabricCanvas.backgroundColor = 'yellow';
-    const rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 200, height: 200 });
-
-    fabricCanvas.add(rect);
     
+    let camera, scene, renderer, texture, raycaster, mouse;
+    const clickableMeshes = []; // Array para almacenar los objetos que se pueden clickear
     
-    
-// Crear un texto
-const text = new fabric.Text('Hola, mundo!', { 
-  left: 150, 
-  top: 50, 
-  fontSize: 24, 
-  fill: 'blue' // Color del texto
-});
-fabricCanvas.add(text);
-    
-    fabricCanvas.renderAll();
-
-    // Set up the Three.js texture using the Fabric canvas
-    texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
-    texture.minFilter = THREE.LinearFilter;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 2);
-
-    fabricCanvas.on("after:render", () => {
-      texture.needsUpdate = true;
-    });
-
-    init();
     function loadModel() {
-  const loader = new OBJLoader();
-  loader.load(
-    './shirt.obj',
-    (object) => {
-      object.traverse((child) => {
-        if (child.isMesh) {
-          // Imprime información sobre el mesh o nodo
-          console.log("Mesh Info:", {
-            name: child.name,
-            position: child.position,
-            rotation: child.rotation,
-            scale: child.scale,
-            material: child.material,
-            geometry: child.geometry,
-          });
-
-          // Aplica la textura
-          child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
-        }
-      });
-      object.position.set(0, -10, 0); // Centra el modelo
-      object.scale.set(0.005, 0.005, 0.005); // Ajusta la escala si es necesario
-      scene.add(object);
-    },
-    (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
-    (error) => console.error('Error loading the model', error)
-  );
-}
-
+      const loader = new OBJLoader();
+      loader.load(
+        './shirt.obj',
+        (object) => {
+          object.traverse((child) => {
+            if (child.isMesh) {
+              console.log("Mesh Info:", {
+                name: child.name,
+                position: child.position,
+                rotation: child.rotation,
+                scale: child.scale,
+                material: child.material,
+                geometry: child.geometry,
+              });
     
-
+              // Aplica la textura
+              child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
+              
+              // Añade el mesh a clickableMeshes para poder detectarlo en clics
+              clickableMeshes.push(child);
+            }
+          });
+          object.position.set(0, -10, 0); // Centra el modelo
+          object.scale.set(0.005, 0.005, 0.005); // Ajusta la escala si es necesario
+          scene.add(object);
+        },
+        (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
+        (error) => console.error('Error loading the model', error)
+      );
+    }
+    
     function init() {
-      // Set up the camera and scene
+      // Configura la cámara y la escena
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 1.5, 3);
-
+    
       scene = new THREE.Scene();
       scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-
+    
       const pointLight = new THREE.PointLight(0xffffff, 1);
       camera.add(pointLight);
       scene.add(camera);
-
-      // Set up the renderer
+    
+      // Configura el renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.getElementById("threejscanvas").appendChild(renderer.domElement);
-
+    
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.minDistance = 1;
       controls.maxDistance = 10;
-
+    
+      // Inicializa el raycaster y el mouse
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+    
+      // Evento de clic
+      window.addEventListener('click', onClick, false);
+    
       loadModel();
-
       window.addEventListener('resize', onWindowResize);
       animate();
     }
-
+    
+    function onClick(event) {
+      // Calcula la posición del mouse en coordenadas normalizadas (de -1 a 1)
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+      // Configura el raycaster con la posición de la cámara y el mouse
+      raycaster.setFromCamera(mouse, camera);
+    
+      // Calcula intersecciones con los objetos clickeables
+      const intersects = raycaster.intersectObjects(clickableMeshes);
+    
+      if (intersects.length > 0) {
+        // Obtiene el primer objeto intersectado
+        const clickedMesh = intersects[0].object;
+        console.log("Clicked Mesh Info:", {
+          name: clickedMesh.name,
+          position: clickedMesh.position,
+          rotation: clickedMesh.rotation,
+          scale: clickedMesh.scale,
+          material: clickedMesh.material,
+          geometry: clickedMesh.geometry,
+        });
+      }
+    }
+    
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
-
+    
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     }
-  </script>
+    
+    init();
+      </script>
 </body>
 </html>
