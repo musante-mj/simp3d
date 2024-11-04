@@ -17,34 +17,28 @@
 <body>
   <div id="threejscanvas"></div>
   <canvas id="cnvs" height="512" width="512"></canvas>
+  
+  <!-- Botones para aplicar y borrar el decal -->
+  <button onclick="applyDecal()">Aplicar Decal</button>
+  <button onclick="removeDecal()">Borrar Decal</button>
+
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
-    let camera, scene, renderer, texture;
+    let camera, scene, renderer, texture, decalMaterial;
     const clickableMeshes = []; // Array para almacenar los objetos que se pueden clickear
-
-
+    const decals = []; // Array para almacenar los decals aplicados
 
     // Initialize Fabric.js and create the canvas
     const fabricCanvas = new fabric.Canvas('cnvs');
     fabricCanvas.backgroundColor = 'yellow';
     const rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 200, height: 200 });
-
     fabricCanvas.add(rect);
-    
-    
-    
-// Crear un texto
-const text = new fabric.Text('Hola, mundo!', { 
-  left: 150, 
-  top: 50, 
-  fontSize: 24, 
-  fill: 'blue' // Color del texto
-});
-fabricCanvas.add(text);
-    
+
+    const text = new fabric.Text('Hola, mundo!', { left: 150, top: 50, fontSize: 24, fill: 'blue' });
+    fabricCanvas.add(text);
     fabricCanvas.renderAll();
 
     // Set up the Three.js texture using the Fabric canvas
@@ -58,48 +52,37 @@ fabricCanvas.add(text);
       texture.needsUpdate = true;
     });
 
+    // Material del decal con la textura de Fabric.js
+    decalMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      depthTest: true,
+      depthWrite: false,
+    });
+
     init();
 
-
-
     function loadModel() {
-  const loader = new OBJLoader();
-  loader.load(
-    './shirt_s.obj',
-    (object) => {
-      object.traverse((child) => {
-        if (child.isMesh) {
-          // Imprime información sobre el mesh o nodo
-          console.log("Mesh Info:", {
-            name: child.name,
-            position: child.position,
-            rotation: child.rotation,
-            scale: child.scale,
-            material: child.material,
-            geometry: child.geometry,
+      const loader = new OBJLoader();
+      loader.load(
+        './shirt_s.obj',
+        (object) => {
+          object.traverse((child) => {
+            if (child.isMesh && child.name !== 'Cap_11') {
+              child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
+              clickableMeshes.push(child);
+            }
           });
-
-          // Aplica la textura solo si el nombre no es 'Cap Subdivision_Surface Sphere'
-          if (child.name !== 'Cap_11') {
-            child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
-          }
-
-          clickableMeshes.push(child);
-        }
-      });
-      object.position.set(0, 0, 0); // Centra el modelo
-      object.scale.set(0.025, 0.025, 0.025); // Ajusta la escala si es necesario
-      scene.add(object);
-    },
-    (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
-    (error) => console.error('Error loading the model', error)
-  );
-}
-
-
+          object.position.set(0, 0, 0); 
+          object.scale.set(0.025, 0.025, 0.025); 
+          scene.add(object);
+        },
+        (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
+        (error) => console.error('Error loading the model', error)
+      );
+    }
 
     function init() {
-      // Set up the camera and scene
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 1.5, 3);
 
@@ -110,7 +93,6 @@ fabricCanvas.add(text);
       camera.add(pointLight);
       scene.add(camera);
 
-      // Set up the renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -119,41 +101,6 @@ fabricCanvas.add(text);
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.minDistance = 1;
       controls.maxDistance = 10;
-
-  // Inicializa el raycaster y el mouse
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-
-  // Evento de clic
-  window.addEventListener('click', onClick, false);
-
-
-function onClick(event) {
-  // Calcula la posición del mouse en coordenadas normalizadas (de -1 a 1)
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  // Configura el raycaster con la posición de la cámara y el mouse
-  raycaster.setFromCamera(mouse, camera);
-
-  // Calcula intersecciones con los objetos clickeables
-  const intersects = raycaster.intersectObjects(clickableMeshes);
-
-  if (intersects.length > 0) {
-    // Obtiene el primer objeto intersectado
-    const clickedMesh = intersects[0].object;
-    console.log("Clicked Mesh Info:", {
-      name: clickedMesh.name,
-      position: clickedMesh.position,
-      rotation: clickedMesh.rotation,
-      scale: clickedMesh.scale,
-      material: clickedMesh.material,
-      geometry: clickedMesh.geometry,
-    });
-  }
-}
-
 
       loadModel();
 
@@ -170,6 +117,28 @@ function onClick(event) {
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
+    }
+
+    // Función para aplicar el decal
+    function applyDecal() {
+      if (clickableMeshes.length > 0) {
+        const targetMesh = clickableMeshes[0]; // Asumiendo que queremos aplicar el decal en el primer mesh
+        const position = new THREE.Vector3(0, 0, 0); // Ajusta según donde quieras aplicarlo
+        const orientation = new THREE.Euler(0, 0, 0);
+        const size = new THREE.Vector3(1, 1, 1);
+
+        const decalGeometry = new THREE.DecalGeometry(targetMesh, position, orientation, size);
+        const decal = new THREE.Mesh(decalGeometry, decalMaterial);
+
+        decals.push(decal);
+        scene.add(decal);
+      }
+    }
+
+    // Función para eliminar los decals
+    function removeDecal() {
+      decals.forEach(decal => scene.remove(decal));
+      decals.length = 0; // Limpia el array de decals
     }
   </script>
 </body>
