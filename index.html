@@ -17,19 +17,15 @@
 <body>
   <div id="threejscanvas"></div>
   <canvas id="cnvs" height="512" width="512"></canvas>
-  
-  <!-- Botones para aplicar y borrar el decal -->
-  <button onclick="applyDecal()">Aplicar Decal</button>
-  <button onclick="removeDecal()">Borrar Decal</button>
-
+  <button onclick="applyDecal()">Apply Decal</button>
+  <button onclick="removeDecal()">Remove Decal</button>
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
-    let camera, scene, renderer, texture, decalMaterial;
-    const clickableMeshes = []; // Array para almacenar los objetos que se pueden clickear
-    const decals = []; // Array para almacenar los decals aplicados
+    let camera, scene, renderer, texture, decalApplied = false;
+    const clickableMeshes = [];
 
     // Initialize Fabric.js and create the canvas
     const fabricCanvas = new fabric.Canvas('cnvs');
@@ -37,7 +33,13 @@
     const rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 200, height: 200 });
     fabricCanvas.add(rect);
 
-    const text = new fabric.Text('Hola, mundo!', { left: 150, top: 50, fontSize: 24, fill: 'blue' });
+    // Create a text object
+    const text = new fabric.Text('Hola, mundo!', { 
+      left: 150, 
+      top: 50, 
+      fontSize: 24, 
+      fill: 'blue' 
+    });
     fabricCanvas.add(text);
     fabricCanvas.renderAll();
 
@@ -50,14 +52,6 @@
 
     fabricCanvas.on("after:render", () => {
       texture.needsUpdate = true;
-    });
-
-    // Material del decal con la textura de Fabric.js
-    decalMaterial = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      depthTest: true,
-      depthWrite: false,
     });
 
     init();
@@ -73,8 +67,8 @@
               clickableMeshes.push(child);
             }
           });
-          object.position.set(0, 0, 0); 
-          object.scale.set(0.025, 0.025, 0.025); 
+          object.position.set(0, 0, 0);
+          object.scale.set(0.025, 0.025, 0.025);
           scene.add(object);
         },
         (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
@@ -119,27 +113,25 @@
       renderer.render(scene, camera);
     }
 
-    // Función para aplicar el decal
-    function applyDecal() {
-      if (clickableMeshes.length > 0) {
-        const targetMesh = clickableMeshes[0]; // Asumiendo que queremos aplicar el decal en el primer mesh
-        const position = new THREE.Vector3(0, 0, 0); // Ajusta según donde quieras aplicarlo
-        const orientation = new THREE.Euler(0, 0, 0);
-        const size = new THREE.Vector3(1, 1, 1);
-
-        const decalGeometry = new THREE.DecalGeometry(targetMesh, position, orientation, size);
-        const decal = new THREE.Mesh(decalGeometry, decalMaterial);
-
-        decals.push(decal);
-        scene.add(decal);
+    // Define applyDecal and removeDecal functions in the global scope
+    window.applyDecal = function() {
+      if (!decalApplied) {
+        fabricCanvas.backgroundColor = 'yellow';
+        fabricCanvas.renderAll();
+        decalApplied = true;
       }
-    }
+    };
 
-    // Función para eliminar los decals
-    function removeDecal() {
-      decals.forEach(decal => scene.remove(decal));
-      decals.length = 0; // Limpia el array de decals
-    }
+    window.removeDecal = function() {
+      if (decalApplied) {
+        fabricCanvas.backgroundColor = ''; // Remove background color
+        fabricCanvas.clear(); // Clear fabric canvas
+        fabricCanvas.add(rect); // Re-add initial elements if needed
+        fabricCanvas.add(text);
+        fabricCanvas.renderAll();
+        decalApplied = false;
+      }
+    };
   </script>
 </body>
 </html>
