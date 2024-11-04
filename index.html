@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Three.js con Fabric.js</title>
+  <title>Three.js con Fabric.js y GLTFLoader</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
       }
     }
   </script>
@@ -19,19 +19,18 @@
   <canvas id="cnvs" height="1024" width="1024"></canvas>
   <script type="module">
     import * as THREE from 'three';
-    import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-    let camera, scene, renderer, object, texture;
-    
+    let camera, scene, renderer, model, texture;
+
     // Inicializa Fabric.js y crea el canvas
     var canvas = new fabric.Canvas('cnvs');
     canvas.backgroundColor = 'yellow';
     var rect = new fabric.Rect({ left: 256, top: 256, fill: 'red', width: 100, height: 100 });
     canvas.add(rect);
     canvas.renderAll();
-    
+
     // Configura la textura de Three.js usando el canvas de Fabric
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
     texture.premultiplyAlpha = false;
@@ -40,101 +39,54 @@
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, 2); // Ajusta la repetición de la textura para cubrir más áreas
 
+    // Actualiza la textura cuando el canvas de Fabric.js cambia
     canvas.on("after:render", function() {
       texture.needsUpdate = true;
     });
-    
+
     init();
-    
+
     function init() {
+      // Configura la cámara y la escena
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20);
-      camera.position.z = 2.5;
-    
+      camera.position.set(0, 1.5, 3);
+
       scene = new THREE.Scene();
       scene.add(new THREE.AmbientLight(0xffffff));
-    
-      const pointLight = new THREE.PointLight(0xffffff, 15);
+
+      const pointLight = new THREE.PointLight(0xffffff, 1);
       camera.add(pointLight);
       scene.add(camera);
-    
-      const manager = new THREE.LoadingManager(loadModel);
-      const loader = new OBJLoader(manager);
-      loader.load('./shirt.obj', function(obj) {
-        object = obj;
+
+      // Carga el modelo GLTF
+      const loader = new GLTFLoader();
+      loader.load('./shirt.gltf', function(gltf) {
+        model = gltf.scene;
+
+        // Aplica la textura a todos los materiales del modelo
+        model.traverse(function(child) {
+          if (child.isMesh) {
+            child.material.map = texture;
+            child.material.needsUpdate = true;
+          }
+        });
+
+        scene.add(model);
       }, onProgress, onError);
 
+      // Configura el renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(512, 512);
+      renderer.setSize(window.innerWidth, window.innerHeight);
       document.getElementById("threejscanvas").appendChild(renderer.domElement);
-      
+
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.minDistance = 2;
       controls.maxDistance = 5;
-    
+
       window.addEventListener('resize', onWindowResize);
       animate();
     }
-    
-
-
-
-
-    function loadModel() {
-    const geometries = [];
-
-    // Recorre todos los nodos del objeto cargado
-    object.traverse(child => {
-        // Solo recoge los elementos que son mallas (Mesh) y tienen geometría
-        if (child.isMesh && child.geometry) {
-            // Asegura que todas las geometrías tengan un índice para la fusión
-            if (!child.geometry.index) {
-                child.geometry.setIndex(child.geometry.getAttribute('position').array);
-            }
-            geometries.push(child.geometry);
-        } else {
-            console.log("Elemento ignorado, no es una malla:", child);
-        }
-    });
-
-    if (geometries.length > 0) {
-        try {
-            // Fusiona las geometrías en una sola
-            const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
-            mergedGeometry.computeBoundingBox();
-            mergedGeometry.computeBoundingSphere();
-
-            // Crea una malla con la geometría fusionada y aplica la textura
-            const mergedMesh = new THREE.Mesh(
-                mergedGeometry,
-                new THREE.MeshStandardMaterial({ map: texture })
-            );
-            mergedMesh.position.y = -0.95;
-            mergedMesh.scale.setScalar(0.005);
-
-            // Añade la malla fusionada a la escena
-            scene.add(mergedMesh);
-        } catch (error) {
-            console.error("Error al fusionar geometrías:", error);
-        }
-    } else {
-        console.error("No hay geometrías para fusionar.");
-        // Si no se pueden fusionar, aplica la textura a cada malla individualmente
-        object.traverse(child => {
-            if (child.isMesh) {
-                child.material = new THREE.MeshStandardMaterial({ map: texture });
-                scene.add(child);
-            }
-        });
-    }
-}
-
-
-
-
-
-
-
 
     function onProgress(xhr) {
       if (xhr.lengthComputable) {
@@ -142,15 +94,17 @@
         console.log('Modelo ' + percentComplete.toFixed(2) + '% descargado');
       }
     }
-    
-    function onError() {}
-    
+
+    function onError(error) {
+      console.error('Error al cargar el modelo', error);
+    }
+
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
-    
+
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
@@ -158,4 +112,3 @@
   </script>
 </body>
 </html>
-
