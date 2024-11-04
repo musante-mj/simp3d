@@ -36,6 +36,11 @@
     
     // Configura la textura de Three.js usando el canvas de Fabric
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
+    texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set( 2, 2 );
+
+
     canvas.on("after:render", function() {
       texture.needsUpdate = true;
     });
@@ -85,9 +90,10 @@
       const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
       
       // Crea un solo Mesh con la geometría fusionada y aplica la textura
-      const mergedMesh = new THREE.Mesh(mergedGeometry, new THREE.MeshBasicMaterial({ map: texture }));
+      const mergedMesh = new THREE.Mesh(mergedGeometry,
+       new THREE.MeshBasicMaterial({ map: texture }));
       mergedMesh.position.y = -0.95;
-      mergedMesh.scale.setScalar(0.02);
+      mergedMesh.scale.setScalar(0.01);
 
       // Añade el Mesh fusionado a la escena
       scene.add(mergedMesh);
