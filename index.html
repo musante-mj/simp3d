@@ -88,8 +88,7 @@
       if (geometries.length > 0) {
         // Fusiona las geometrías en una sola
         const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
-        mergedGeometry.computeBoundingBox();
-        mergedGeometry.computeBoundingSphere();
+    
 
         // Crea un solo Mesh con la geometría fusionada y aplica la textura
         const mergedMesh = new THREE.Mesh(mergedGeometry,
