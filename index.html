@@ -59,6 +59,9 @@ fabricCanvas.add(text);
     });
 
     init();
+
+
+
     function loadModel() {
   const loader = new OBJLoader();
   loader.load(
@@ -76,10 +79,12 @@ fabricCanvas.add(text);
             geometry: child.geometry,
           });
 
-          // Aplica la textura
-          child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
-          clickableMeshes.push(child);
+          // Aplica la textura solo si el nombre no es 'Cap Subdivision_Surface Sphere'
+          if (child.name !== 'Cap Subdivision_Surface Sphere') {
+            child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
+          }
 
+          clickableMeshes.push(child);
         }
       });
       object.position.set(0, -1, 0); // Centra el modelo
@@ -91,7 +96,7 @@ fabricCanvas.add(text);
   );
 }
 
-    
+
 
     function init() {
       // Set up the camera and scene
