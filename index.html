@@ -56,25 +56,35 @@ fabricCanvas.add(text);
     });
 
     init();
-
     function loadModel() {
-      const loader = new OBJLoader();
-      loader.load(
-        './shirt.obj',
-        (object) => {
-          object.traverse((child) => {
-            if (child.isMesh) {
-              child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa }); // Fallback color
-            }
+  const loader = new OBJLoader();
+  loader.load(
+    './shirt.obj',
+    (object) => {
+      object.traverse((child) => {
+        if (child.isMesh) {
+          // Imprime información sobre el mesh o nodo
+          console.log("Mesh Info:", {
+            name: child.name,
+            position: child.position,
+            rotation: child.rotation,
+            scale: child.scale,
+            material: child.material,
+            geometry: child.geometry,
           });
-          object.position.set(0, -10, 0); // Centering the model
-          object.scale.set(0.005, 0.005, 0.005); // Adjust the scale if needed
-          scene.add(object);
-        },
-        (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
-        (error) => console.error('Error loading the model', error)
-      );
-    }
+
+          // Aplica la textura
+          child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
+        }
+      });
+      object.position.set(0, -10, 0); // Centra el modelo
+      object.scale.set(0.005, 0.005, 0.005); // Ajusta la escala si es necesario
+      scene.add(object);
+    },
+    (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
+    (error) => console.error('Error loading the model', error)
+  );
+}
 
     
 
