@@ -23,9 +23,11 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+    import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 
     let camera, scene, renderer, texture, decalApplied = false;
     const clickableMeshes = [];
+    let decalMesh; // To hold the decal mesh
 
     // Initialize Fabric.js and create the canvas
     const fabricCanvas = new fabric.Canvas('cnvs');
@@ -113,22 +115,29 @@
       renderer.render(scene, camera);
     }
 
-    // Define applyDecal and removeDecal functions in the global scope
     window.applyDecal = function() {
-      if (!decalApplied) {
-        fabricCanvas.backgroundColor = 'yellow';
-        fabricCanvas.renderAll();
+      if (!decalApplied && clickableMeshes.length > 0) {
+        const mesh = clickableMeshes[0]; // Get the first clickable mesh
+        const position = new THREE.Vector3(0, 0, 0); // Change to where you want the decal
+        const orientation = new THREE.Euler(0, 0, 0); // Set the orientation for the decal
+        const size = new THREE.Vector3(0.5, 0.5, 0.01); // Set the size of the decal
+
+        // Create a DecalGeometry and mesh for the decal
+        const decalGeometry = new DecalGeometry(mesh, position, orientation, size);
+        const decalMaterial = new THREE.MeshBasicMaterial({ map: texture, depthWrite: false });
+        decalMesh = new THREE.Mesh(decalGeometry, decalMaterial);
+        scene.add(decalMesh);
+
         decalApplied = true;
       }
     };
 
     window.removeDecal = function() {
-      if (decalApplied) {
-        fabricCanvas.backgroundColor = ''; // Remove background color
-        fabricCanvas.clear(); // Clear fabric canvas
-        fabricCanvas.add(rect); // Re-add initial elements if needed
-        fabricCanvas.add(text);
-        fabricCanvas.renderAll();
+      if (decalApplied && decalMesh) {
+        scene.remove(decalMesh);
+        decalMesh.geometry.dispose(); // Dispose of the geometry to free memory
+        decalMesh.material.dispose(); // Dispose of the material to free memory
+        decalMesh = null;
         decalApplied = false;
       }
     };
