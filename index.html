@@ -13,21 +13,53 @@
     }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <style>
+    #decal-form {
+      margin: 10px;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 5px;
+    }
+    input {
+      margin: 5px;
+    }
+  </style>
 </head>
 <body>
   <div id="threejscanvas"></div>
   <canvas id="cnvs" height="512" width="512"></canvas>
-  <button onclick="applyDecal()">Apply Decal</button>
-  <button onclick="removeDecal()">Remove Decal</button>
+  <div id="decal-form">
+    <h3>Decal Configuration</h3>
+    <label>Position X:</label>
+    <input type="number" id="decalPosX" value="0" step="0.1">
+    <label>Position Y:</label>
+    <input type="number" id="decalPosY" value="0" step="0.1">
+    <label>Position Z:</label>
+    <input type="number" id="decalPosZ" value="0" step="0.1"><br>
+    <label>Orientation X:</label>
+    <input type="number" id="decalOrientX" value="0" step="0.1">
+    <label>Orientation Y:</label>
+    <input type="number" id="decalOrientY" value="0" step="0.1">
+    <label>Orientation Z:</label>
+    <input type="number" id="decalOrientZ" value="0" step="0.1"><br>
+    <label>Size X:</label>
+    <input type="number" id="decalSizeX" value="0.5" step="0.1">
+    <label>Size Y:</label>
+    <input type="number" id="decalSizeY" value="0.5" step="0.1">
+    <label>Size Z:</label>
+    <input type="number" id="decalSizeZ" value="0.01" step="0.01"><br>
+    <button onclick="applyDecal()">Apply Decal</button>
+    <button onclick="removeDecal()">Remove Decal</button>
+  </div>
+
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 
-    let camera, scene, renderer, texture, decalApplied = false;
+    let camera, scene, renderer, texture, decalMesh, decalApplied = false;
     const clickableMeshes = [];
-    let decalMesh; // To hold the decal mesh
 
     // Initialize Fabric.js and create the canvas
     const fabricCanvas = new fabric.Canvas('cnvs');
@@ -65,7 +97,7 @@
         (object) => {
           object.traverse((child) => {
             if (child.isMesh && child.name !== 'Cap_11') {
-              child.material = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+              child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
               clickableMeshes.push(child);
             }
           });
@@ -91,8 +123,8 @@
 
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.getElementById("threejscanvas").appendChild(renderer.domElement);
+      renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
+            document.getElementById("threejscanvas").appendChild(renderer.domElement);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.minDistance = 1;
@@ -115,12 +147,27 @@
       renderer.render(scene, camera);
     }
 
+    // Define applyDecal and removeDecal functions in the global scope
     window.applyDecal = function() {
       if (!decalApplied && clickableMeshes.length > 0) {
         const mesh = clickableMeshes[0]; // Get the first clickable mesh
-        const position = new THREE.Vector3(0, 0, 0); // Change to where you want the decal
-        const orientation = new THREE.Euler(0, 0, 0); // Set the orientation for the decal
-        const size = new THREE.Vector3(0.5, 0.5, 0.01); // Set the size of the decal
+        const position = new THREE.Vector3(
+          parseFloat(document.getElementById("decalPosX").value),
+          parseFloat(document.getElementById("decalPosY").value),
+          parseFloat(document.getElementById("decalPosZ").value)
+        );
+
+        const orientation = new THREE.Euler(
+          parseFloat(document.getElementById("decalOrientX").value),
+          parseFloat(document.getElementById("decalOrientY").value),
+          parseFloat(document.getElementById("decalOrientZ").value)
+        );
+
+        const size = new THREE.Vector3(
+          parseFloat(document.getElementById("decalSizeX").value),
+          parseFloat(document.getElementById("decalSizeY").value),
+          parseFloat(document.getElementById("decalSizeZ").value)
+        );
 
         // Create a DecalGeometry and mesh for the decal
         const decalGeometry = new DecalGeometry(mesh, position, orientation, size);
@@ -133,11 +180,8 @@
     };
 
     window.removeDecal = function() {
-      if (decalApplied && decalMesh) {
-        scene.remove(decalMesh);
-        decalMesh.geometry.dispose(); // Dispose of the geometry to free memory
-        decalMesh.material.dispose(); // Dispose of the material to free memory
-        decalMesh = null;
+      if (decalApplied) {
+        scene.remove(decalMesh); // Remove the decal mesh
         decalApplied = false;
       }
     };
