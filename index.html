@@ -38,7 +38,7 @@
     texture.minFilter = THREE.LinearFilter;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 1); // Ajusta el valor de repetición aquí según el tamaño de la textura
+    texture.repeat.set(2, 2); // Ajusta la repetición de la textura para cubrir más áreas
 
     canvas.on("after:render", function() {
       texture.needsUpdate = true;
@@ -85,17 +85,30 @@
         }
       });
 
-      
-        console.log("nopudo");
+      if (geometries.length > 0) {
+        // Fusiona las geometrías en una sola
+        const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
+        mergedGeometry.computeBoundingBox();
+        mergedGeometry.computeBoundingSphere();
+
+        // Crea un solo Mesh con la geometría fusionada y aplica la textura
+        const mergedMesh = new THREE.Mesh(mergedGeometry,
+         new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide }));
+        mergedMesh.position.y = -0.95;
+        mergedMesh.scale.setScalar(0.005);
+
+        // Añade el Mesh fusionado a la escena
+        scene.add(mergedMesh);
+      } else {
         // Si no se puede fusionar, aplica la textura individualmente a cada submalla
         object.traverse(function(child) {
           if (child.isMesh) {
-            child.material = new THREE.MeshStandardMaterial({ map: texture });
+            child.material = new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide });
             scene.add(child);
           }
         });
       }
-    
+    }
     
     function onProgress(xhr) {
       if (xhr.lengthComputable) {
@@ -119,3 +132,4 @@
   </script>
 </body>
 </html>
+
