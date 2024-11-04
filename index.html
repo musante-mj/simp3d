@@ -86,6 +86,8 @@
       });
 
       if (geometries.length > 0) {
+        
+        console.log("pudo");
         // Fusiona las geometrías en una sola
         const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
         mergedGeometry.computeBoundingBox();
@@ -100,6 +102,7 @@
         // Añade el Mesh fusionado a la escena
         scene.add(mergedMesh);
       } else {
+        console.log("nopudo");
         // Si no se puede fusionar, aplica la textura individualmente a cada submalla
         object.traverse(function(child) {
           if (child.isMesh) {
