@@ -45,8 +45,8 @@ const fabricCanvas = new fabric.Canvas('cnvs', {
 
 // Carga la imagen de fondo y ajústala al tamaño del canvas
 fabric.Image.fromURL('./uv.png', (img) => {
-  img.scaleToWidth(4096);
-  img.scaleToHeight(4096);
+  img.scaleToWidth(512);
+  img.scaleToHeight(512);
   fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
 });
 
