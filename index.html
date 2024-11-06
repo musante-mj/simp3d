@@ -15,8 +15,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 </head>
 <body>
-  <div id="threejscanvas" style="width: 100%; height: 50vh;"></div>
-  <canvas id="cnvs" height="512" width="512"></canvas>
+  <div id="threejscanvas" style="width: 100%; height: 30vh;"></div>
+  <canvas id="cnvs" height="1024" width="1024"></canvas>
   <button id="apply-decal">Apply Decal</button>
   <button id="remove-decal">Remove Decal</button>
   <script type="module">
@@ -32,14 +32,14 @@
 
     // Initialize Fabric.js and create the canvas
     const fabricCanvas = new fabric.Canvas('cnvs', {
-      width: 512,
-      height: 512
+      width: 1024,
+      height: 1024
     });
 
     // Load the background image and fit it to the canvas
     fabric.Image.fromURL('./uv.png', (img) => {
-      img.scaleToWidth(512);
-      img.scaleToHeight(512);
+      img.scaleToWidth(1024);
+      img.scaleToHeight(1024);
       fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
     });
 
