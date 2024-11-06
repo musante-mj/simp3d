@@ -76,22 +76,25 @@ fabric.Image.fromURL('./uv.png', (img) => {
 
     function loadModel() {
       const loader = new OBJLoader();
-      loader.load(
-        './shirt_real.obj',
-        (object) => {
-          object.traverse((child) => {
-            if (child.isMesh) {
-              child.material = new THREE.MeshBasicMaterial({ map: texture, color: 0xaaaaaa });
-              clickableMeshes.push(child);
-            }
-          });
-          object.position.set(0, 0, 0);
-          object.scale.set(0.25, 0.25, 0.25);
-          scene.add(object);
-        },
-        (xhr) => console.log((xhr.loaded / xhr.total * 100) + '% loaded'),
-        (error) => console.error('Error loading the model', error)
-      );
+
+      loader.load('./shirt_real.obj', (object) => {
+  // Creamos un solo material con la textura
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    color: 0xffffff // Puede ser cualquier color base, aquí blanco para no afectar la textura
+  });
+
+  object.traverse((child) => {
+    if (child.isMesh) {
+      child.material = material; // Asigna el mismo material a todos los submeshes
+    }
+  });
+
+  object.position.set(0, 0, 0);
+  object.scale.set(0.25, 0.25, 0.25);
+  scene.add(object);
+});
+
     }
 
     function init() {
