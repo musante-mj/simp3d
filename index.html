@@ -71,9 +71,6 @@
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(1, 1);
 
-    // Add anisotropic filtering to the texture
-    texture.anisotropy = renderer.getMaxAnisotropy();
-
     fabricCanvas.on("after:render", () => {
       texture.needsUpdate = true;
     });
@@ -138,6 +135,9 @@
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.minDistance = 1;
       controls.maxDistance = 10;
+
+      // Apply anisotropy after the renderer has been initialized
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
       loadModel();
       animate();
