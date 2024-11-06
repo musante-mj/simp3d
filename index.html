@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Three.js Decal Exa mple</title>
+  <title>Three.js Decal Example</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="importmap">
@@ -31,40 +31,29 @@
     const mouse = new THREE.Vector2();
 
     // Initialize Fabric.js and create the canvas
-    //const fabricCanvas = new fabric.Canvas('cnvs');
-    //fabricCanvas.backgroundColor = 'yellow';
-    // Configura el tamaño del canvas
-const fabricCanvas = new fabric.Canvas('cnvs', {
-  width: 512,
-  height: 512
-});
+    const fabricCanvas = new fabric.Canvas('cnvs', {
+      width: 512,
+      height: 512
+    });
 
+    // Load the background image and fit it to the canvas
+    fabric.Image.fromURL('./uv.png', (img) => {
+      img.scaleToWidth(512);
+      img.scaleToHeight(512);
+      fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
+    });
 
+    // Load and add the SVG to the Fabric canvas
+    fabric.loadSVGFromURL('./cs.svg', (objects, options) => {
+      const svgObject = fabric.util.groupSVGElements(objects, options);
+      fabricCanvas.add(svgObject);
+      fabricCanvas.renderAll();
+    });
 
-
-
-// Carga la imagen de fondo y ajústala al tamaño del canvas
-fabric.Image.fromURL('./uv.png', (img) => {
-  img.scaleToWidth(512);
-  img.scaleToHeight(512);
-  fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
-});
-
-
-
-
-
-fabric.loadSVGFromURL('./cs.svg', (objects, options) => {
-  const svgObject = fabric.util.groupSVGElements(objects, options);
-  fabricCanvas.add(svgObject);
-  fabricCanvas.renderAll();
-});
-
-    
+    // Create a rectangle and text on the Fabric canvas
     const rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 200, height: 200 });
     fabricCanvas.add(rect);
 
-    // Create a text object
     const text = new fabric.Text('Hola, mundo!', { 
       left: 150, 
       top: 50, 
@@ -76,11 +65,11 @@ fabric.loadSVGFromURL('./cs.svg', (objects, options) => {
 
     // Set up the Three.js texture using the Fabric canvas
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
-    texture.minFilter = THREE.LinearFilter;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;  // Improved filtering
+    texture.magFilter = THREE.LinearFilter;
     texture.wrapS = THREE.RepeatWrapping;
-texture.wrapT = THREE.RepeatWrapping;
-texture.repeat.set(1, 1);
-
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1, 1);
 
     fabricCanvas.on("after:render", () => {
       texture.needsUpdate = true;
@@ -92,57 +81,64 @@ texture.repeat.set(1, 1);
       const loader = new OBJLoader();
 
       loader.load('./shirt_real.obj', (object) => {
-  // Creamos un solo material con la textura
-  const material  = new THREE.MeshStandardMaterial({
-    map: texture});
+        // Create a single material with the texture
+        const material  = new THREE.MeshStandardMaterial({
+          map: texture
+        });
 
-  object.traverse((child) => {
-    if (child.isMesh) {
-      child.material = material; // Asigna el mismo material a todos los submeshes
-    }
-  });
+        object.traverse((child) => {
+          if (child.isMesh) {
+            child.material = material; // Assign the material to all sub-meshes
+          }
+        });
 
-  object.position.set(0, 0, 0);
-  object.scale.set(1, 1, 1);
-  scene.add(object);
-});
-
+        object.position.set(0, 0, 0);
+        object.scale.set(1, 1, 1);
+        scene.add(object);
+      });
     }
 
     function init() {
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 1.5, 3);
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 1.5, 3);
 
-  scene = new THREE.Scene();
+      scene = new THREE.Scene();
 
-  // Luz ambiental con menor intensidad
-  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+      // Ambient light with lower intensity
+      scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // Luz puntual
-  const pointLight = new THREE.PointLight(0xffffff, 0.8);
-  pointLight.position.set(0, 3, 3);
-  camera.add(pointLight);
-  scene.add(camera);
+      // Point light
+      const pointLight = new THREE.PointLight(0xffffff, 0.8);
+      pointLight.position.set(0, 3, 3);
+      camera.add(pointLight);
+      scene.add(camera);
 
-  // Luz de relleno (opcional)
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
-  fillLight.position.set(-3, 2, 2);
-  scene.add(fillLight);
+      // Directional light (added to illuminate the model)
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(5, 5, 5); // Light position
+      directionalLight.castShadow = true; // Enable shadows
+      scene.add(directionalLight);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight / 2);
-  renderer.toneMappingExposure = 1; // Ajusta la exposición global
+      // Optional fill light
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+      fillLight.position.set(-3, 2, 2);
+      scene.add(fillLight);
 
-  document.getElementById("threejscanvas").appendChild(renderer.domElement);
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight / 2);
+      renderer.toneMappingExposure = 1; // Adjust global exposure
+      renderer.shadowMap.enabled = true; // Enable shadows
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.minDistance = 1;
-  controls.maxDistance = 10;
+      document.getElementById("threejscanvas").appendChild(renderer.domElement);
 
-  loadModel();
-  animate();
-}
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.minDistance = 1;
+      controls.maxDistance = 10;
+
+      loadModel();
+      animate();
+    }
 
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -155,8 +151,6 @@ texture.repeat.set(1, 1);
       renderer.render(scene, camera);
     }
 
-
- 
   </script>
 </body>
 </html>
