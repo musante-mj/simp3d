@@ -39,6 +39,15 @@ const fabricCanvas = new fabric.Canvas('cnvs', {
   height: 1024
 });
 
+
+// Aplica una transformación al canvas de Fabric.js
+fabricCanvas.getContext().scale(1, -1); // Invierte verticalmente el canvas
+fabricCanvas.setDimensions({
+  width: 1024,
+  height: -1024 // Ajusta para que el tamaño se mantenga
+});
+
+
 // Carga la imagen de fondo y ajústala al tamaño del canvas
 fabric.Image.fromURL('./uv.png', (img) => {
   img.scaleToWidth(1024);
@@ -64,14 +73,9 @@ fabric.Image.fromURL('./uv.png', (img) => {
     // Set up the Three.js texture using the Fabric canvas
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
     texture.minFilter = THREE.LinearFilter;
-
+    texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set(1, 1);
-
-
-texture.wrapS = THREE.ClampToEdgeWrapping;
-texture.wrapT = THREE.ClampToEdgeWrapping;
-texture.flipY = false; 
-
 
 
     fabricCanvas.on("after:render", () => {
