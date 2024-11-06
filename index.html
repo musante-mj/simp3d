@@ -32,14 +32,14 @@
 
     // Initialize Fabric.js and create the canvas
     const fabricCanvas = new fabric.Canvas('cnvs', {
-      width: 1024,
-      height: 1024
+      width: 4096,
+      height: 4096
     });
 
     // Load the background image and fit it to the canvas
     fabric.Image.fromURL('./uv.png', (img) => {
-      img.scaleToWidth(1024);
-      img.scaleToHeight(1024);
+      img.scaleToWidth(4096);
+      img.scaleToHeight(4096);
       fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
     });
 
