@@ -35,8 +35,8 @@
     //fabricCanvas.backgroundColor = 'yellow';
     // Configura el tamaño del canvas
 const fabricCanvas = new fabric.Canvas('cnvs', {
-  width: 4096,
-  height: 4096
+  width: 512,
+  height: 512
 });
 
 
@@ -59,7 +59,7 @@ fabric.Image.fromURL('./uv.png', (img) => {
     const text = new fabric.Text('Hola, mundo!', { 
       left: 150, 
       top: 50, 
-      fontSize: 24, 
+      fontSize: 44, 
       fill: 'blue' 
     });
     fabricCanvas.add(text);
