@@ -85,9 +85,7 @@ texture.repeat.set(1, 1);
       loader.load('./shirt_real.obj', (object) => {
   // Creamos un solo material con la textura
   const material = new THREE.MeshBasicMaterial({
-    map: texture,
-    color: 0xffffff // Puede ser cualquier color base, aquí blanco para no afectar la textura
-  });
+    map: texture});
 
   object.traverse((child) => {
     if (child.isMesh) {
