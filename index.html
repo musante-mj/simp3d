@@ -31,14 +31,26 @@
     const mouse = new THREE.Vector2();
 
     // Initialize Fabric.js and create the canvas
-
+    //const fabricCanvas = new fabric.Canvas('cnvs');
+    //fabricCanvas.backgroundColor = 'yellow';
+    // Configura el tamaño del canvas
+const fabricCanvas = new fabric.Canvas('cnvs', {
+  width: 1024,
+  height: 1024
+});
 
 // Carga la imagen de fondo y ajústala al tamaño del canvas
-fabric.Image.fromURL('./uv.png', (img) => {
+fabric.Image.fromURL('ruta/a/tu/uvmap.png', (img) => {
   img.scaleToWidth(1024);
   img.scaleToHeight(1024);
   fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
 });
+
+    
+    
+    const rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 200, height: 200 });
+    fabricCanvas.add(rect);
+
     // Create a text object
     const text = new fabric.Text('Hola, mundo!', { 
       left: 150, 
