@@ -88,7 +88,7 @@
         const material = new THREE.MeshStandardMaterial({
           map: texture,
           roughness: 0.5,
-          metalness: 0.2,
+          metalness: 0,
         });
 
         object.traverse((child) => {
@@ -112,13 +112,13 @@
       scene = new THREE.Scene();
 
       // Ambient and Hemisphere lighting
-      scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+      scene.add(new THREE.AmbientLight(0xffffff, 1));
       const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
       scene.add(hemisphereLight);
 
       // Directional light for shadows
       const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-      directionalLight.position.set(5, 5, 5);
+      directionalLight.position.set(2, 2, 2);
       directionalLight.castShadow = true;
       directionalLight.shadow.mapSize.width = 2048;
       directionalLight.shadow.mapSize.height = 2048;
@@ -136,14 +136,6 @@
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.minDistance = 1;
       controls.maxDistance = 10;
-
-      // Set up post-processing
-      composer = new EffectComposer(renderer);
-      const renderPass = new RenderPass(scene, camera);
-      composer.addPass(renderPass);
-
-      const smaaPass = new SMAAPass(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
-      composer.addPass(smaaPass);
 
       loadModel();
       animate();
