@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Three.js Decal Example</title>
+  <title>Three.js Decal Example with Enhancements</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="importmap">
@@ -24,16 +24,19 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 
-    let camera, scene, renderer, texture, decalMesh, decalApplied = false;
+    let camera, scene, renderer, composer, texture, decalMesh, decalApplied = false;
     const clickableMeshes = [];
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
     // Initialize Fabric.js and create the canvas
     const fabricCanvas = new fabric.Canvas('cnvs', {
-      width:512,
-      height:512
+      width: 512,
+      height: 512
     });
 
     // Load the background image and fit it to the canvas
@@ -65,11 +68,11 @@
 
     // Set up the Three.js texture using the Fabric canvas
     texture = new THREE.CanvasTexture(document.getElementById("cnvs"));
-    texture.minFilter = THREE.LinearMipmapLinearFilter;  // Improved filtering
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 1);
+    texture.anisotropy = 16;  // Maximum anisotropy for better texture quality
 
     fabricCanvas.on("after:render", () => {
       texture.needsUpdate = true;
@@ -81,14 +84,18 @@
       const loader = new OBJLoader();
 
       loader.load('./shirt_real.obj', (object) => {
-        // Create a single material with the texture
-        const material  = new THREE.MeshStandardMaterial({
-          map: texture
+        // Enhanced material with roughness and metalness for a more realistic look
+        const material = new THREE.MeshStandardMaterial({
+          map: texture,
+          roughness: 0.5,
+          metalness: 0.2,
         });
 
         object.traverse((child) => {
           if (child.isMesh) {
-            child.material = material; // Assign the material to all sub-meshes
+            child.material = material;
+            child.castShadow = true; // Enable shadows
+            child.receiveShadow = true;
           }
         });
 
@@ -104,31 +111,25 @@
 
       scene = new THREE.Scene();
 
-      // Ambient light with lower intensity
-      scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+      // Ambient and Hemisphere lighting
+      scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+      const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+      scene.add(hemisphereLight);
 
-      // Point light
-      const pointLight = new THREE.PointLight(0xffffff, 0.8);
-      pointLight.position.set(0, 3, 3);
-      camera.add(pointLight);
-      scene.add(camera);
-
-      // Directional light (added to illuminate the model)
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(5, 5, 5); // Light position
-      directionalLight.castShadow = true; // Enable shadows
+      // Directional light for shadows
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      directionalLight.position.set(5, 5, 5);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 2048;
+      directionalLight.shadow.mapSize.height = 2048;
       scene.add(directionalLight);
-
-      // Optional fill light
-      const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
-      fillLight.position.set(-3, 2, 2);
-      scene.add(fillLight);
 
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight / 2);
-      renderer.toneMappingExposure = 1; // Adjust global exposure
-      renderer.shadowMap.enabled = true; // Enable shadows
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
+      renderer.shadowMap.enabled = true;
 
       document.getElementById("threejscanvas").appendChild(renderer.domElement);
 
@@ -136,8 +137,13 @@
       controls.minDistance = 1;
       controls.maxDistance = 10;
 
-      // Apply anisotropy after the renderer has been initialized
-      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      // Set up post-processing
+      composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      const smaaPass = new SMAAPass(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
+      composer.addPass(smaaPass);
 
       loadModel();
       animate();
@@ -147,13 +153,15 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight / 2);
+      composer.setSize(window.innerWidth, window.innerHeight / 2);
     }
+
+    window.addEventListener('resize', onWindowResize);
 
     function animate() {
       requestAnimationFrame(animate);
-      renderer.render(scene, camera);
+      composer.render();  // Use composer instead of renderer for post-processing
     }
-
   </script>
 </body>
 </html>
